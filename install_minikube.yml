@@ -21,8 +21,16 @@
       ansible.builtin.command: minikube version
       register: minikube_version
       changed_when: false
+      become: no
+
+    - name: Ensure ubuntu user can access Docker
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: yes
 
     - name: Start Minikube cluster
       ansible.builtin.command: minikube start --driver=docker
       register: minikube_start
       changed_when: minikube_start.rc == 0
+      become: no
