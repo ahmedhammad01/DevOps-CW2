@@ -1,0 +1,30 @@
+---
+- name: Install kubectl on Production Server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Add Kubernetes apt key
+      ansible.builtin.get_url:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        mode: '0644'
+
+    - name: Add Kubernetes apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+        filename: kubernetes
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install kubectl
+      ansible.builtin.apt:
+        name: kubectl
+        state: present
+
+    - name: Verify kubectl installation
+      ansible.builtin.command: kubectl version --client
+      register: kubectl_version
+      changed_when: false
