@@ -1,0 +1,28 @@
+---
+- name: Install and configure Minikube on Production Server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - curl
+          - conntrack
+        state: present
+        update_cache: yes
+
+    - name: Download Minikube binary
+      ansible.builtin.get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    - name: Verify Minikube installation
+      ansible.builtin.command: minikube version
+      register: minikube_version
+      changed_when: false
+
+    - name: Start Minikube cluster
+      ansible.builtin.command: minikube start --driver=docker
+      register: minikube_start
+      changed_when: minikube_start.rc == 0
