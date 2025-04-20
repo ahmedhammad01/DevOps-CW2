@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDS = credentials('dockerhub')
         PRODUCTION_SERVER = '54.80.89.134'
-        KUBE_CRED = credentials('kube-cred') // SSH Username with private key
+        KUBE_CRED = credentials('kube-cred')
     }
     stages {
         stage('Checkout') {
@@ -36,20 +36,14 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    // Use sshagent to handle SSH credentials
-                    sshagent(credentials: ['kube-cred']) {
-                        // Execute deployment script on the remote server
-                        sh '''
-                            ssh -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << EOF
-                                cd ~/DevOps-CW2
-                                git pull origin main
-                                kubectl apply -f cw2-server.yml
-                                kubectl rollout status deployment/cw2-server-deployment
-                            EOF
-                        '''
-                    }
-                }
+                sh '''
+                    ssh -i $KUBE_CRED -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << EOF
+                        cd ~/DevOps-CW2
+                        git pull origin main
+                        kubectl apply -f cw2-server.yml
+                        kubectl rollout status deployment/cw2-server-deployment
+EOF
+                '''
             }
         }
     }
