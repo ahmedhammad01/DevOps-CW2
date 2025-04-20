@@ -8,7 +8,7 @@ pipeline {
       stages {
           stage('Checkout') {
               steps {
-                  git 'https://github.com/ahmedhammad01/DevOps-CW2.git'
+                  git branch:'main', url:  'https://github.com/ahmedhammad01/DevOps-CW2.git'
               }
           }
           stage('Build Docker Image') {
