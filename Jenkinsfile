@@ -19,6 +19,7 @@ pipeline {
           stage('Test Container') {
               steps {
                   sh '''
+		      docker rm -f test-container || true
                       docker run -d --name test-container -p 8081:8080 ahmed6922/cw2-server:1.0
                       sleep 5
                       curl http://localhost:8081 | grep "DevOps Coursework 2!"
