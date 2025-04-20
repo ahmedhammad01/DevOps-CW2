@@ -37,24 +37,21 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Write the private SSH key to a temporary file
-                    writeFile file: '/tmp/kube_key', text: credentials('kube-cred')
+                    // Use the withCredentials block to inject the SSH private key into the pipeline
+                    withCredentials([file(credentialsId: 'kube-cred', variable: 'KUBE_SSH_KEY')]) {
+                        // Set appropriate permissions for the SSH key
+                        sh 'chmod 600 $KUBE_SSH_KEY'
 
-                    // Set appropriate permissions for the SSH key
-                    sh 'chmod 600 /tmp/kube_key'
-
-                    // Execute the deployment script on the remote server
-                    sh '''
-                        ssh -i /tmp/kube_key -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << EOF
-                            cd ~/DevOps-CW2
-                            git pull origin main
-                            kubectl apply -f cw2-server.yml
-                            kubectl rollout status deployment/cw2-server-deployment
-                        EOF
-                    '''
-
-                    // Clean up the temporary SSH key file
-                    sh 'rm -f /tmp/kube_key'
+                        // Execute the deployment script on the remote server
+                        sh '''
+                            ssh -i $KUBE_SSH_KEY -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << EOF
+                                cd ~/DevOps-CW2
+                                git pull origin main
+                                kubectl apply -f cw2-server.yml
+                                kubectl rollout status deployment/cw2-server-deployment
+                            EOF
+                        '''
+                    }
                 }
             }
         }
