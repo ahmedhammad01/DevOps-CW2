@@ -37,7 +37,7 @@ pipeline {
           stage('Deploy to Kubernetes') {
               steps {
                   sh '''
-                      ssh -i $KUBE_CRED -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << 'EOF'
+                      ssh -i $KUBE_CRED -o StrictHostKeyChecking=no ubuntu@$PRODUCTION_SERVER << EOF
                           cd ~/DevOps-CW2
                           git pull origin main
                           kubectl apply -f cw2-server.yml
