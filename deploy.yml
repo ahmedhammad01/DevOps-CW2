@@ -1,0 +1,68 @@
+- name: Deploy cw2-server to Kubernetes
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Ensure DevOps-CW2 repository is up-to-date
+      git:
+        repo: 'https://github.com/ahmedhammad01/DevOps-CW2.git'
+        dest: '/home/ubuntu/DevOps-CW2'
+        update: yes
+        force: yes
+      tags: git
+    - name: Apply Kubernetes deployment
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: cw2-server-deployment
+            namespace: default
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: cw2-server
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 0
+            template:
+              metadata:
+                labels:
+                  app: cw2-server
+              spec:
+                containers:
+                - name: cw2-server
+                  image: ahmed6922/cw2-server:1.0
+                  ports:
+                  - containerPort: 8080
+      tags: deploy
+    - name: Apply Kubernetes service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: cw2-server-service
+            namespace: default
+          spec:
+            selector:
+              app: cw2-server
+            ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 8080
+              nodePort: 30007
+            type: NodePort
+      tags: service
+    - name: Wait for deployment rollout
+      kubernetes.core.k8s_info:
+        kind: Deployment
+        name: cw2-server-deployment
+        namespace: default
+        wait: yes
+        wait_timeout: 300
+      tags: deploy

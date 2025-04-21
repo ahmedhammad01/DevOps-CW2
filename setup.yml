@@ -1,0 +1,19 @@
+- name: Provision Production Server
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Install kubectl
+      become: yes
+      snap:
+        name: kubectl
+        classic: yes
+      tags: kubectl
+    - name: Install minikube
+      become: yes
+      shell: |
+        curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        install minikube-linux-amd64 /usr/local/bin/minikube
+      tags: minikube
+    - name: Start minikube
+      command: minikube start --driver=docker
+      tags: minikube
