@@ -42,6 +42,7 @@
     - name: Apply Kubernetes service
       kubernetes.core.k8s:
         state: present
+        kubeconfig: ~/.kube/config
         definition:
           apiVersion: v1
           kind: Service
