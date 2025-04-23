@@ -2,7 +2,7 @@ pipeline {
       agent any
       environment {
           DOCKERHUB_CREDS = credentials('dockerhub')
-          PRODUCTION_SERVER = '54.80.89.134'
+          PRODUCTION_SERVER = '54.221.24.230'
           KUBE_CRED = credentials('kube-cred')
       }
       stages {
